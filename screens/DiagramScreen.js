@@ -4,7 +4,7 @@ import { View, Text, Image, StyleSheet, Button } from 'react-native';
 const diagrams = [
   { id: 1, title: 'Skeletal System', image: require('../assets/tea.jpeg') },
   { id: 2, title: 'Muscular System', image: require('../assets/user.png') },
-  // Add more diagrams here
+
 ];
 
 export default function DiagramScreen() {

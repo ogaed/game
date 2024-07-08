@@ -115,11 +115,10 @@ const allPairs = [
 
 ];
 
-// Function to generate levels with random questions
 const generateLevels = (pairs) => {
   const levels = [];
-  const pairsPerLevel = 3; // Number of pairs per level
-  const shuffledPairs = pairs.sort(() => 0.5 - Math.random()); // Shuffle pairs randomly
+  const pairsPerLevel = 3; 
+  const shuffledPairs = pairs.sort(() => 0.5 - Math.random()); 
 
   for (let i = 0; i < pairs.length; i += pairsPerLevel) {
     levels.push({
@@ -128,7 +127,7 @@ const generateLevels = (pairs) => {
         organ: pair.organ,
         function: pair.function,
         question: pair.question,
-        selected: false, // Track if the pair is selected/matched
+        selected: false, 
       })),
     });
   }
@@ -136,14 +135,13 @@ const generateLevels = (pairs) => {
   return levels;
 };
 
-// Generate levels from allPairs
 const levels = generateLevels(allPairs);
 
 export default function MiniGameScreen() {
-  const [currentLevel, setCurrentLevel] = useState(0); // Start with level 0 (before starting)
+  const [currentLevel, setCurrentLevel] = useState(0);
   const [matchedPairs, setMatchedPairs] = useState([]);
   const [selectedPair, setSelectedPair] = useState(null);
-  const [hints, setHints] = useState(3); // Number of hints available
+  const [hints, setHints] = useState(3); 
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
@@ -182,7 +180,6 @@ export default function MiniGameScreen() {
       setSelectedPair(null);
       setShowModal(false);
     } else {
-      // Game completed
       alert("Congratulations! You've completed all levels.");
     }
   };
