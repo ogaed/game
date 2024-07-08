@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, FlatList, Modal, Button } from 'react-native';
 
-// Updated data structure with questions
+
 const allPairs = [
     { organ: "Heart", function: "Pumps blood", question: "What does the heart do?" },
     { organ: "Lungs", function: "Breathing", question: "What do lungs help with?" },
