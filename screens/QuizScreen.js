@@ -1,6 +1,7 @@
 // screens/QuizScreen.js
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, TextInput } from 'react-native';
+import { TouchableOpacity } from 'react-native-gesture-handler';
 
 const questionsData = {
     "levels": [
@@ -1381,8 +1382,16 @@ export default function QuizScreen() {
             value={userAnswer}
             onChangeText={setUserAnswer}
           />
-          <Button title="Submit Answer" onPress={handleAnswer} />
-          <Button title="Show Hint" onPress={getHint} />
+
+          {/* ruse touchable opacity for buttons */}
+          <TouchableOpacity style={styles.buttons1} onPress={handleAnswer}>
+            <Text>Submit Answer</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.buttons2} onPress={getHint}>
+            <Text>Show Hint</Text>
+          </TouchableOpacity>
+          
           <Text style={styles.trials}>Trials: {trials}/3</Text>
           <Text style={styles.coins}>Coins: {coins}</Text>
         </>
@@ -1437,5 +1446,22 @@ const styles = StyleSheet.create({
   completed: {
     fontSize: 24,
     marginTop: 20,
+  },
+  buttons1: {
+    justifyContent: 'space-between',
+    width: '80%',
+    padding: 10 ,
+    backgroundColor: 'rgb(203 213 225)',
+    borderRadius: 8,
+    fontSize: 24
+  },
+  buttons2: {
+    justifyContent: 'space-between',
+    width: '80%',
+    padding: 10 ,
+    backgroundColor: 'rgb(203 213 225)',
+    borderRadius: 8,
+    marginTop: 12,
+    fontSize: 24
   },
 });
