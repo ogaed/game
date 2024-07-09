@@ -1,8 +1,9 @@
 // screens/QuizScreen.js
-import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, Alert, ImageBackground } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
+//import { AdMobRewarded } from 'expo-ads-admob';
 const questionsData = {
     "levels": [
       {
@@ -1308,160 +1309,216 @@ const questionsData = {
     ]
   };
   
-
-export default function QuizScreen() {
-  const [currentLevel, setCurrentLevel] = useState(0);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [score, setScore] = useState(0);
-  const [coins, setCoins] = useState(0);
-  const [hints, setHints] = useState(3);
-  const [trials, setTrials] = useState(0);
-  const [hintUsed, setHintUsed] = useState(false);
-  const [userAnswer, setUserAnswer] = useState('');
-
-  const level = questionsData.levels[currentLevel];
-  const question = level.questions[currentQuestion];
-
-  const handleAnswer = () => {
-    if (userAnswer.toLowerCase() === question.answer.toLowerCase()) {
-      if (hintUsed) {
-        setScore(score + 5);
-        setCoins(coins + 5);
+  export default function QuizScreen() {
+    const [currentLevel, setCurrentLevel] = useState(0);
+    const [currentQuestion, setCurrentQuestion] = useState(0);
+    const [score, setScore] = useState(0);
+    const [coins, setCoins] = useState(0);
+    const [hints, setHints] = useState(3);
+    const [trials, setTrials] = useState(0);
+    const [hintUsed, setHintUsed] = useState(false);
+    const [userAnswer, setUserAnswer] = useState('');
+  
+    useEffect(() => {
+      const loadProgress = async () => {
+        try {
+          const level = await AsyncStorage.getItem('currentLevel');
+          const question = await AsyncStorage.getItem('currentQuestion');
+          const score = await AsyncStorage.getItem('score');
+          const coins = await AsyncStorage.getItem('coins');
+          const hints = await AsyncStorage.getItem('hints');
+          if (level !== null) setCurrentLevel(JSON.parse(level));
+          if (question !== null) setCurrentQuestion(JSON.parse(question));
+          if (score !== null) setScore(JSON.parse(score));
+          if (coins !== null) setCoins(JSON.parse(coins));
+          if (hints !== null) setHints(JSON.parse(hints));
+        } catch (error) {
+          console.error("Failed to load progress", error);
+        }
+      };
+  
+      loadProgress();
+    }, []);
+  
+    useEffect(() => {
+      const saveProgress = async () => {
+        try {
+          await AsyncStorage.setItem('currentLevel', JSON.stringify(currentLevel));
+          await AsyncStorage.setItem('currentQuestion', JSON.stringify(currentQuestion));
+          await AsyncStorage.setItem('score', JSON.stringify(score));
+          await AsyncStorage.setItem('coins', JSON.stringify(coins));
+          await AsyncStorage.setItem('hints', JSON.stringify(hints));
+        } catch (error) {
+          console.error("Failed to save progress", error);
+        }
+      };
+  
+      saveProgress();
+    }, [currentLevel, currentQuestion, score, coins, hints]);
+  
+    const showAd = async () => {
+      // await AdMobRewarded.setAdUnitID('YOUR_AD_UNIT_ID'); 
+      // await AdMobRewarded.requestAdAsync();
+      // await AdMobRewarded.showAdAsync();
+  
+      // AdMobRewarded.addEventListener('rewardedVideoUserDidEarnReward', () => {
+      //   setCoins(coins + 5);
+      // });
+    };
+  
+    const handleAnswer = () => {
+      if (userAnswer.toLowerCase() === question.answer.toLowerCase()) {
+        if (hintUsed) {
+          setScore(score + 5);
+          setCoins(coins + 5);
+        } else {
+          setScore(score + 10 - trials);
+          setCoins(coins + 10);
+        }
+        setHintUsed(false);
+        setTrials(0);
+  
+        if (currentQuestion < level.questions.length - 1) {
+          setCurrentQuestion(currentQuestion + 1);
+        } else {
+          setCurrentLevel(currentLevel + 1);
+          setCurrentQuestion(0);
+        }
       } else {
-        setScore(score + 10 - trials);
-        setCoins(coins + 10);
+        setTrials(trials + 1);
+        if (trials >= 2) {
+          Alert.alert('Incorrect', 'You have used all trials. Watch an ad to refill your coins.');
+          setTrials(0);
+        }
       }
-     
-      setCurrentQuestion(currentQuestion + 1);
-      setHintUsed(false);
-      setTrials(0);
-    } else {
-      setTrials(trials + 1);
-    }
-
-    if (trials >= 2) {
-      alert(`Answer: ${question.answer}`);
-      setTrials(0);
-      setHints(hints > 0 ? hints - 1 : 0);
-    }
-
-    if (currentQuestion >= level.questions.length - 1) {
+      setUserAnswer('');
+    };
+  
+    const getHint = () => {
+      if (hints > 0 && coins >= 8) {
+        Alert.alert('Hint', `The answer is: ${question.answer}`);
+        setHints(hints - 1);
+        setCoins(coins - 8);
+        setHintUsed(true);
+      } else if (coins < 8) {
+        Alert.alert('Not enough coins', 'You need at least 8 coins to use a hint.');
+      } else {
+        Alert.alert('No hints left', 'You have used all your hints.');
+      }
+    };
+  
+    const goToNextLevel = () => {
       setCurrentLevel(currentLevel + 1);
       setCurrentQuestion(0);
-    }
-    setUserAnswer('');
-  };
-
-  const getHint = () => {
-    if (hints > 0 && coins >= 8) {
-      alert(`Hint: The answer is ${question.answer}`);
-      setHints(hints - 1);
-      setCoins(coins - 8);
-      setHintUsed(true);
-    } else if (coins < 8) {
-      alert('Not enough coins to use a hint');
-    } else {
-      alert('No more hints available');
-    }
-  };
-
-  const goToNextLevel = () => {
-    setCurrentLevel(currentLevel + 1);
-    setCurrentQuestion(0);
-  };
-
-  return (
-    <View style={styles.container}>
-      {currentLevel < questionsData.levels.length ? (
-        <>
-          <Text style={styles.title}>Level {level.level}: {level.category}</Text>
-          <Text style={styles.question}>{question.question}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Type your answer here"
-            value={userAnswer}
-            onChangeText={setUserAnswer}
-          />
-
-          {/* ruse touchable opacity for buttons */}
-          <TouchableOpacity style={styles.buttons1} onPress={handleAnswer}>
-            <Text>Submit Answer</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.buttons2} onPress={getHint}>
-            <Text>Show Hint</Text>
-          </TouchableOpacity>
-          
-          <Text style={styles.trials}>Trials: {trials}/3</Text>
-          <Text style={styles.coins}>Coins: {coins}</Text>
-        </>
-      ) : (
-        <>
-          <Text style={styles.score}>Your total score: {score}</Text>
-          {currentLevel < questionsData.levels.length - 1 ? (
-            <Button title="Next Level" onPress={goToNextLevel} />
-          ) : (
-            <Text style={styles.completed}>Congratulations! You've completed all levels!</Text>
-          )}
-        </>
-      )}
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-  },
-  question: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    marginBottom: 20,
-    padding: 10,
-    width: '80%',
-  },
-  trials: {
-    fontSize: 18,
-    marginTop: 20,
-  },
-  score: {
-    fontSize: 24,
-  },
-  coins: {
-    fontSize: 18,
-    marginTop: 20,
-  },
-  completed: {
-    fontSize: 24,
-    marginTop: 20,
-  },
-  buttons1: {
-    justifyContent: 'space-between',
-    width: '80%',
-    padding: 10 ,
-    backgroundColor: 'rgb(203 213 225)',
-    borderRadius: 8,
-    fontSize: 24
-  },
-  buttons2: {
-    justifyContent: 'space-between',
-    width: '80%',
-    padding: 10 ,
-    backgroundColor: 'rgb(203 213 225)',
-    borderRadius: 8,
-    marginTop: 12,
-    fontSize: 24
-  },
-});
+    };
+  
+    const goToPreviousLevel = () => {
+      if (currentLevel > 0) {
+        setCurrentLevel(currentLevel - 1);
+        setCurrentQuestion(0);
+      }
+    };
+  
+    const level = questionsData.levels[currentLevel];
+    const question = level.questions[currentQuestion];
+  
+    return (
+      <ImageBackground source={require('../assets/background.jpg')} style={styles.container}>
+        {currentLevel < questionsData.levels.length ? (
+          <>
+            <Text style={styles.title}>Level {level.level}: {level.category}</Text>
+            <Text style={styles.question}>{question.question}</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Type your answer here"
+              value={userAnswer}
+              onChangeText={setUserAnswer}
+            />
+            <TouchableOpacity style={styles.button} onPress={handleAnswer}>
+              <Text>Submit Answer</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={getHint}>
+              <Text>Show Hint</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={showAd}>
+              <Text>Watch Ad to Refill Coins</Text>
+            </TouchableOpacity>
+            <Text style={styles.trials}>Trials: {trials}/3</Text>
+            <Text style={styles.coins}>Coins: {coins}</Text>
+            <TouchableOpacity style={styles.button} onPress={goToPreviousLevel}>
+              <Text>Previous Level</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text style={styles.score}>Your total score: {score}</Text>
+            {currentLevel < questionsData.levels.length - 1 ? (
+              <TouchableOpacity style={styles.button} onPress={goToNextLevel}>
+                <Text>Next Level</Text>
+              </TouchableOpacity>
+            ) : (
+              <Text style={styles.completed}>Congratulations! You've completed all levels!</Text>
+            )}
+          </>
+        )}
+      </ImageBackground>
+    );
+  }
+  
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 20,
+    },
+    title: {
+      fontSize: 24,
+      marginBottom: 20,
+      color: 'white',
+    },
+    question: {
+      fontSize: 18,
+      marginBottom: 20,
+      color: 'white',
+    },
+    input: {
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 1,
+      marginBottom: 20,
+      padding: 10,
+      width: '80%',
+      backgroundColor: 'white',
+    },
+    trials: {
+      fontSize: 18,
+      marginTop: 20,
+      color: 'white',
+    },
+    score: {
+      fontSize: 24,
+      color: 'white',
+    },
+    coins: {
+      fontSize: 18,
+      marginTop: 20,
+      color: 'white',
+    },
+    completed: {
+      fontSize: 24,
+      marginTop: 20,
+      color: 'white',
+    },
+    button: {
+      justifyContent: 'space-between',
+      width: '80%',
+      padding: 10,
+      backgroundColor: 'rgba(203, 213, 225, 0.8)',
+      borderRadius: 8,
+      marginTop: 12,
+      alignItems: 'center',
+    },
+  });
+  
+  

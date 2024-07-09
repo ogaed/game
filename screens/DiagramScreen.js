@@ -10,12 +10,13 @@ const diagrams = [
 export default function DiagramScreen() {
   return (
     <View style={styles.container}>
-      {diagrams.map((diagram) => (
+      <Text>Coming soon</Text>
+      {/* {diagrams.map((diagram) => (
         <View key={diagram.id} style={styles.diagramContainer}>
           <Text style={styles.title}>{diagram.title}</Text>
           <Image source={diagram.image} style={styles.image} />
         </View>
-      ))}
+      ))} */}
     </View>
   );
 }

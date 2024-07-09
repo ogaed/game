@@ -193,7 +193,8 @@ export default function MiniGameScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.level}>Level {currentLevel + 1}</Text>
+      <Text>Coming Soon</Text>
+      {/* <Text style={styles.level}>Level {currentLevel + 1}</Text>
       <View style={styles.contentContainer}>
         <View style={styles.column}>
           <Text style={styles.label}>Organs:</Text>
@@ -264,7 +265,7 @@ export default function MiniGameScreen() {
             <Button title="Reset Game" onPress={resetGame} />
           </View>
         </View>
-      </Modal>
+      </Modal> */}
     </View>
   );
 }
