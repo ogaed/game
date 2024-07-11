@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "human body game",
-    "slug": "human body game",
+    "slug": "humanbodygame",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,20 +14,24 @@
     "ios": {
       "supportsTablet": true
     },
-    
-      "reactNative": {
-        "hermesEnabled": false
-      
+    "reactNative": {
+      "hermesEnabled": false
     },
     
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.vigege.humanbodygame"
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "e4ae6a02-b3e0-4b0e-bc40-0609139900ec"
+      }
     }
   }
 }
